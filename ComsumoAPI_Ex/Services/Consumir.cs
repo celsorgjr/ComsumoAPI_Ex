@@ -1,11 +1,13 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace ComsumoAPI_Ex.Services
 {
@@ -14,21 +16,19 @@ namespace ComsumoAPI_Ex.Services
         private string _urlBase;
 
 
-        private void ConsultarValues(HttpClient client)
+        private async Task<List<string>> ConsultarValues(HttpClient client)
         {
             HttpResponseMessage response = client.GetAsync(
                 _urlBase + "values").Result;
 
             Console.WriteLine();
             if (response.StatusCode == HttpStatusCode.OK)
-                Console.WriteLine(response.Content.ReadAsStringAsync().Result);
+                return JsonConvert.DeserializeObject<List<String>>(response.Content.ReadAsStringAsync().Result);
             else
-                Console.WriteLine("Token provavelmente expirado!");
-
-            //Console.ReadKey();
+                return new List<string> { "Token provavelmente expirado!" };
         }
 
-        public void Chamada()
+        public async Task<List<string>> Chamada()
         {
             var builder = new ConfigurationBuilder()
                  .SetBasePath(Directory.GetCurrentDirectory())
@@ -62,9 +62,12 @@ namespace ComsumoAPI_Ex.Services
                     {
                         client.DefaultRequestHeaders.Authorization =
                             new AuthenticationHeaderValue("Bearer", token.AccessToken);
-                        ConsultarValues(client);
-                    }
-                }
+                        return await ConsultarValues(client);
+                    }else
+                        return new List<string> { "Não authenticado" };
+                }else
+                    return new List<string> { "Erro : " + respToken.StatusCode } ;
+
             }
         }
     }

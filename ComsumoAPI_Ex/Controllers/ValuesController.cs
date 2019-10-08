@@ -13,12 +13,12 @@ namespace ComsumoAPI_Ex.Controllers
     {
         // GET api/values
         [HttpGet]
-        public ActionResult<IEnumerable<string>> Get()
+        public async Task<IEnumerable<string>> Get()
         {
-            var consumoe = new Consumir();
-            
-            consumoe.Chamada();
-            return new string[] { "value1", "value2" };
+            var consumoe = await new Consumir().Chamada();
+
+            return consumoe;
+            //return new string[] { "value1", "value2" };
         }
 
         // GET api/values/5
